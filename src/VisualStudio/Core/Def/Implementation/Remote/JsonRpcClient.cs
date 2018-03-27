@@ -24,19 +24,26 @@ namespace Microsoft.VisualStudio.LanguageServices.Remote
         private JsonRpcDisconnectedEventArgs _debuggingLastDisconnectReason;
         private string _debuggingLastDisconnectCallstack;
 
-        public JsonRpcEx(TraceSource logger, Stream stream, object callbackTarget, bool useThisAsCallback)
+        public JsonRpcEx(Workspace workspace, TraceSource logger, Stream stream, object callbackTarget, bool useThisAsCallback)
         {
+            Contract.Requires(workspace != null);
             Contract.Requires(logger != null);
             Contract.Requires(stream != null);
 
             var target = useThisAsCallback ? this : callbackTarget;
 
+            Workspace = workspace;
             _logger = logger;
 
             _rpc = new JsonRpc(new JsonRpcMessageHandler(stream, stream), target);
             _rpc.JsonSerializer.Converters.Add(AggregateJsonConverter.Instance);
 
             _rpc.Disconnected += OnDisconnected;
+        }
+
+        public Workspace Workspace
+        {
+            get;
         }
 
         protected abstract void Dispose(bool disposing);
